@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import supabase from "@/lib/db";
+import Supabase from "@/lib/db";
 import { IMenu } from "@/types/menu";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -11,7 +11,7 @@ const Home = () => {
 	const [menus, setMenus] = useState<IMenu[]>([]);
 	useEffect(() => {
 		const fetchMenus = async () => {
-			const { data, error } = await supabase.from("menus").select("*");
+			const { data, error } = await Supabase.from("menus").select("*");
 			if (error) {
 				console.log("ada error: ", error);
 			} else {
