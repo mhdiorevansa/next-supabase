@@ -22,10 +22,35 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Ellipsis } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { DialogClose } from "@radix-ui/react-dialog";
+import { toast } from "sonner";
 
 const AdminPage = () => {
 	const [menus, setMenus] = useState<IMenu[]>([]);
+	const [createDialog, setCreateDialog] = useState(false);
+
 	useEffect(() => {
 		const fetchMenus = async () => {
 			const { data, error } = await Supabase.from("menus").select("*");
@@ -37,11 +62,91 @@ const AdminPage = () => {
 		};
 		fetchMenus();
 	}, []);
+
+	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		const formData = new FormData(e.currentTarget);
+		try {
+			const { data, error } = await Supabase.from("menus")
+				.insert(Object.fromEntries(formData))
+				.select("*");
+			if (error) {
+				console.log("error: ", error);
+			} else {
+				setMenus((prev) => [...prev, ...data]);
+				toast("Menu berhasil ditambahkan");
+				setCreateDialog(false);
+			}
+		} catch (error) {
+			console.log("error: ", error);
+		}
+	};
+
 	return (
 		<main className="container mx-auto py-8">
 			<div className="mb-4 w-full flex justify-between">
 				<h1 className="text-3xl font-bold mb-4">Menu</h1>
-				<Button className="font-bold">Tambah Menu</Button>
+				<Dialog open={createDialog} onOpenChange={setCreateDialog}>
+					<DialogTrigger asChild>
+						<Button className="font-bold cursor-pointer">Tambah Menu</Button>
+					</DialogTrigger>
+					<DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto no-scrollbar">
+						<form onSubmit={handleSubmit} className="space-y-4">
+							<DialogHeader>
+								<DialogTitle>Tambah Menu</DialogTitle>
+								<DialogDescription>Membuat menu baru dengan input data</DialogDescription>
+							</DialogHeader>
+							<div className="grid w-full gap-4">
+								<div className="grid w-full gap-3">
+									<Label htmlFor="nama">Nama Menu</Label>
+									<Input id="nama" name="name" placeholder="Masukkan Nama Menu" required />
+								</div>
+								<div className="grid w-full gap-3">
+									<Label htmlFor="harga">Harga Menu</Label>
+									<Input id="harga" name="price" placeholder="Masukkan Harga Menu" required />
+								</div>
+								<div className="grid w-full gap-3">
+									<Label htmlFor="gambar">Gambar Menu</Label>
+									<Input id="gambar" name="image" placeholder="Masukkan URL Gambar Menu" required />
+								</div>
+								<div className="grid w-full gap-3">
+									<Label htmlFor="kategori">Kategori Menu</Label>
+									<Select required name="category">
+										<SelectTrigger className="w-full">
+											<SelectValue placeholder="Pilih Kategori"></SelectValue>
+										</SelectTrigger>
+										<SelectContent>
+											<SelectGroup>
+												<SelectLabel>Kategori Menu</SelectLabel>
+												<SelectItem value="makanan">Makanan</SelectItem>
+												<SelectItem value="minuman">Minuman</SelectItem>
+											</SelectGroup>
+										</SelectContent>
+									</Select>
+								</div>
+								<div className="grid w-full gap-3">
+									<Label htmlFor="deskripsi">Deskripsi Menu</Label>
+									<Textarea
+										id="deskripsi"
+										name="description"
+										required
+										placeholder="Masukkan Deskripsi Menu"
+										className="resize-none h-28"></Textarea>
+								</div>
+							</div>
+							<DialogFooter>
+								<DialogClose asChild>
+									<Button variant={"secondary"} className="cursor-pointer">
+										Batal
+									</Button>
+								</DialogClose>
+								<Button type="submit" className="cursor-pointer">
+									Tambah
+								</Button>
+							</DialogFooter>
+						</form>
+					</DialogContent>
+				</Dialog>
 			</div>
 			<div>
 				<Table>
