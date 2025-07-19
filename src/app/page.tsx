@@ -44,7 +44,7 @@ const Home = () => {
 						</CardContent>
 						<CardFooter>
 							<Button className="w-full font-bold" size="lg">
-								Buy Now
+								Detail Menu
 							</Button>
 						</CardFooter>
 					</Card>
