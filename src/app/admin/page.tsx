@@ -50,6 +50,10 @@ import { toast } from "sonner";
 const AdminPage = () => {
 	const [menus, setMenus] = useState<IMenu[]>([]);
 	const [createDialog, setCreateDialog] = useState(false);
+	const [selectedMenu, setSelectedMenu] = useState<{
+		menu: IMenu;
+		action: "ubah" | "hapus";
+	} | null>(null);
 
 	useEffect(() => {
 		const fetchMenus = async () => {
@@ -82,10 +86,26 @@ const AdminPage = () => {
 		}
 	};
 
+	const handleDeleteMenu = async () => {
+		try {
+			const { error } = await Supabase.from("menus").delete().eq("id", selectedMenu?.menu.id);
+			if (error) {
+				console.log("error: ", error);
+			} else {
+				setMenus((prev) => prev.filter((menu) => menu.id !== selectedMenu?.menu.id));
+				toast("Menu berhasil dihapus");
+				setSelectedMenu(null);
+			}
+		} catch (error) {
+			console.log("error: ", error);
+		}
+	};
+
 	return (
 		<main className="container mx-auto py-8">
 			<div className="mb-4 w-full flex justify-between">
 				<h1 className="text-3xl font-bold mb-4">Menu</h1>
+				{/* modal add */}
 				<Dialog open={createDialog} onOpenChange={setCreateDialog}>
 					<DialogTrigger asChild>
 						<Button className="font-bold cursor-pointer">Tambah Menu</Button>
@@ -148,6 +168,7 @@ const AdminPage = () => {
 					</DialogContent>
 				</Dialog>
 			</div>
+			{/* data table */}
 			<div>
 				<Table>
 					<TableHeader>
@@ -185,7 +206,11 @@ const AdminPage = () => {
 											<DropdownMenuSeparator />
 											<DropdownMenuGroup>
 												<DropdownMenuItem>Ubah</DropdownMenuItem>
-												<DropdownMenuItem className="text-red-400">Hapus</DropdownMenuItem>
+												<DropdownMenuItem
+													className="text-red-400"
+													onClick={() => setSelectedMenu({ menu, action: "hapus" })}>
+													Hapus
+												</DropdownMenuItem>
 											</DropdownMenuGroup>
 										</DropdownMenuContent>
 									</DropdownMenu>
@@ -195,6 +220,33 @@ const AdminPage = () => {
 					</TableBody>
 				</Table>
 			</div>
+			{/* modal delete */}
+			<Dialog
+				open={selectedMenu !== null && selectedMenu.action === "hapus"}
+				onOpenChange={(open) => {
+					if (!open) {
+						setSelectedMenu(null);
+					}
+				}}>
+				<DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto no-scrollbar">
+					<DialogHeader>
+						<DialogTitle>Hapus Menu</DialogTitle>
+						<DialogDescription>
+							Kamu yakin mau hapus menu {selectedMenu?.menu.name}?
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<DialogClose asChild>
+							<Button variant={"secondary"} className="cursor-pointer">
+								Batal
+							</Button>
+						</DialogClose>
+						<Button onClick={handleDeleteMenu} variant={"destructive"} className="cursor-pointer">
+							Hapus
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</main>
 	);
 };
