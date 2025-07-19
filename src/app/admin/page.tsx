@@ -67,7 +67,7 @@ const AdminPage = () => {
 		fetchMenus();
 	}, []);
 
-	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+	const handleAddMenu = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		const formData = new FormData(e.currentTarget);
 		try {
@@ -101,6 +101,29 @@ const AdminPage = () => {
 		}
 	};
 
+	const handleUpdateMenu = async (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		const formData = new FormData(e.currentTarget);
+		try {
+			const { error } = await Supabase.from("menus")
+				.update(Object.fromEntries(formData))
+				.eq("id", selectedMenu?.menu.id);
+			if (error) {
+				console.log("error: ", error);
+			} else {
+				setMenus((prev) =>
+					prev.map((menu) =>
+						menu.id == selectedMenu?.menu.id ? { ...menu, ...Object.fromEntries(formData) } : menu
+					)
+				);
+				toast("Menu berhasil diubah");
+				setSelectedMenu(null);
+			}
+		} catch (error) {
+			console.log("error: ", error);
+		}
+	};
+
 	return (
 		<main className="container mx-auto py-8">
 			<div className="mb-4 w-full flex justify-between">
@@ -111,7 +134,7 @@ const AdminPage = () => {
 						<Button className="font-bold cursor-pointer">Tambah Menu</Button>
 					</DialogTrigger>
 					<DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto no-scrollbar">
-						<form onSubmit={handleSubmit} className="space-y-4">
+						<form onSubmit={handleAddMenu} className="space-y-4">
 							<DialogHeader>
 								<DialogTitle>Tambah Menu</DialogTitle>
 								<DialogDescription>Membuat menu baru dengan input data</DialogDescription>
@@ -133,7 +156,7 @@ const AdminPage = () => {
 									<Label htmlFor="kategori">Kategori Menu</Label>
 									<Select required name="category">
 										<SelectTrigger className="w-full">
-											<SelectValue placeholder="Pilih Kategori"></SelectValue>
+											<SelectValue placeholder="Pilih Kategori" />
 										</SelectTrigger>
 										<SelectContent>
 											<SelectGroup>
@@ -151,12 +174,13 @@ const AdminPage = () => {
 										name="description"
 										required
 										placeholder="Masukkan Deskripsi Menu"
-										className="resize-none h-28"></Textarea>
+										className="resize-none h-28"
+									/>
 								</div>
 							</div>
 							<DialogFooter>
 								<DialogClose asChild>
-									<Button variant={"secondary"} className="cursor-pointer">
+									<Button type="button" variant={"secondary"} className="cursor-pointer">
 										Batal
 									</Button>
 								</DialogClose>
@@ -205,7 +229,9 @@ const AdminPage = () => {
 											<DropdownMenuLabel className="font-bold">Action</DropdownMenuLabel>
 											<DropdownMenuSeparator />
 											<DropdownMenuGroup>
-												<DropdownMenuItem>Ubah</DropdownMenuItem>
+												<DropdownMenuItem onClick={() => setSelectedMenu({ menu, action: "ubah" })}>
+													Ubah
+												</DropdownMenuItem>
 												<DropdownMenuItem
 													className="text-red-400"
 													onClick={() => setSelectedMenu({ menu, action: "hapus" })}>
@@ -245,6 +271,93 @@ const AdminPage = () => {
 							Hapus
 						</Button>
 					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+			{/* modal update */}
+			<Dialog
+				open={selectedMenu !== null && selectedMenu.action === "ubah"}
+				onOpenChange={(open) => {
+					if (!open) {
+						setSelectedMenu(null);
+					}
+				}}>
+				<DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto no-scrollbar">
+					<form onSubmit={handleUpdateMenu} className="space-y-4">
+						<DialogHeader>
+							<DialogTitle>Ubah Menu</DialogTitle>
+							<DialogDescription>
+								Form ini digunakan untuk mengubah menu yang dipilih.
+							</DialogDescription>
+						</DialogHeader>
+						<div className="grid w-full gap-4">
+							<div className="grid w-full gap-3">
+								<Label htmlFor="nama">Ubah Menu</Label>
+								<Input
+									id="nama"
+									name="name"
+									placeholder="Masukkan Nama Menu"
+									required
+									defaultValue={selectedMenu?.menu.name}
+								/>
+							</div>
+							<div className="grid w-full gap-3">
+								<Label htmlFor="harga">Harga Menu</Label>
+								<Input
+									id="harga"
+									name="price"
+									placeholder="Masukkan Harga Menu"
+									required
+									defaultValue={selectedMenu?.menu.price}
+								/>
+							</div>
+							<div className="grid w-full gap-3">
+								<Label htmlFor="gambar">Gambar Menu</Label>
+								<Input
+									id="gambar"
+									name="image"
+									placeholder="Masukkan URL Gambar Menu"
+									required
+									defaultValue={selectedMenu?.menu.image}
+								/>
+							</div>
+							<div className="grid w-full gap-3">
+								<Label htmlFor="kategori">Kategori Menu</Label>
+								<Select required name="category" defaultValue={selectedMenu?.menu.category}>
+									<SelectTrigger className="w-full">
+										<SelectValue placeholder="Pilih Kategori" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectGroup>
+											<SelectLabel>Kategori Menu</SelectLabel>
+											<SelectItem value="food">Makanan</SelectItem>
+											<SelectItem value="drink">Minuman</SelectItem>
+										</SelectGroup>
+									</SelectContent>
+								</Select>
+							</div>
+							<div className="grid w-full gap-3">
+								<Label htmlFor="deskripsi">Deskripsi Menu</Label>
+								<Textarea
+									id="deskripsi"
+									name="description"
+									required
+									placeholder="Masukkan Deskripsi Menu"
+									className="resize-none h-28"
+									defaultValue={selectedMenu?.menu.description}
+								/>
+							</div>
+						</div>
+						<DialogFooter>
+							<DialogClose asChild>
+								<Button type="button" variant={"secondary"} className="cursor-pointer">
+									Batal
+								</Button>
+							</DialogClose>
+							<Button type="submit" className="cursor-pointer">
+								Ubah
+							</Button>
+						</DialogFooter>
+					</form>
 				</DialogContent>
 			</Dialog>
 		</main>
