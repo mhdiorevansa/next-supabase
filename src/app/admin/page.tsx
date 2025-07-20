@@ -76,13 +76,16 @@ const AdminPage = () => {
 				.select("*");
 			if (error) {
 				console.log("error: ", error);
+				toast.error("Gagal menambah menu: " + error.message);
+				return;
 			} else {
 				setMenus((prev) => [...prev, ...data]);
-				toast("Menu berhasil ditambahkan");
+				toast.success("Menu berhasil ditambahkan");
 				setCreateDialog(false);
 			}
 		} catch (error) {
 			console.log("error: ", error);
+			toast.error("Terjadi kesalahan tak terduga.");
 		}
 	};
 
@@ -91,13 +94,16 @@ const AdminPage = () => {
 			const { error } = await Supabase.from("menus").delete().eq("id", selectedMenu?.menu.id);
 			if (error) {
 				console.log("error: ", error);
+				toast.error("Gagal menghapus menu: " + error.message);
+				return;
 			} else {
 				setMenus((prev) => prev.filter((menu) => menu.id !== selectedMenu?.menu.id));
-				toast("Menu berhasil dihapus");
+				toast.success("Menu berhasil dihapus");
 				setSelectedMenu(null);
 			}
 		} catch (error) {
 			console.log("error: ", error);
+			toast.error("Terjadi kesalahan tak terduga.");
 		}
 	};
 
@@ -110,17 +116,20 @@ const AdminPage = () => {
 				.eq("id", selectedMenu?.menu.id);
 			if (error) {
 				console.log("error: ", error);
+				toast.error("Gagal mengubah menu: " + error.message);
+				return;
 			} else {
 				setMenus((prev) =>
 					prev.map((menu) =>
 						menu.id == selectedMenu?.menu.id ? { ...menu, ...Object.fromEntries(formData) } : menu
 					)
 				);
-				toast("Menu berhasil diubah");
+				toast.success("Menu berhasil diubah");
 				setSelectedMenu(null);
 			}
 		} catch (error) {
 			console.log("error: ", error);
+			toast.error("Terjadi kesalahan tak terduga.");
 		}
 	};
 
