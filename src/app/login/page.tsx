@@ -23,8 +23,9 @@ const LoginPage = () => {
 		});
 		if (error) {
 			console.log(error);
-			toast.error(error.message);
+			toast.error("Sepertinya ada kesalahan");
 		}
+		toast.success("Berhasil login");
 		router.push("/admin");
 	};
 
