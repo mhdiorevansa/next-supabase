@@ -46,9 +46,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
 import SupabaseBrowserClient from "@/lib/supabase/client";
+import { User } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
 
 const AdminPage = () => {
+	const router = useRouter();
 	const [menus, setMenus] = useState<IMenu[]>([]);
+	const [user, setUser] = useState<User | null>(null);
 	const [createDialog, setCreateDialog] = useState(false);
 	const [selectedMenu, setSelectedMenu] = useState<{
 		menu: IMenu;
@@ -66,6 +70,21 @@ const AdminPage = () => {
 		};
 		fetchMenus();
 	}, []);
+
+	useEffect(() => {
+		const fetchUserAuth = async () => {
+			const {
+				data: { user },
+				error,
+			} = await SupabaseBrowserClient.auth.getUser();
+			if (error) {
+				console.log("error: ", error);
+			} else {
+				setUser(user);
+			}
+		};
+		fetchUserAuth();
+	});
 
 	const handleAddMenu = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -135,73 +154,92 @@ const AdminPage = () => {
 		}
 	};
 
+	const handleLogout = async () => {
+		const {error} = await SupabaseBrowserClient.auth.signOut();
+		if (error) {
+			console.log("error: ", error);
+			toast.error("Sepertinya ada kesalahan");
+		} else {
+			toast.success("Berhasil logout");
+			router.push('/');
+		}
+	}
+
 	return (
 		<main className="container mx-auto py-8">
 			<div className="mb-4 w-full flex justify-between">
-				<h1 className="text-3xl font-bold mb-4">Menu</h1>
-				{/* modal add */}
-				<Dialog open={createDialog} onOpenChange={setCreateDialog}>
-					<DialogTrigger asChild>
-						<Button className="font-bold cursor-pointer">Tambah Menu</Button>
-					</DialogTrigger>
-					<DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto no-scrollbar">
-						<form onSubmit={handleAddMenu} className="space-y-4">
-							<DialogHeader>
-								<DialogTitle>Tambah Menu</DialogTitle>
-								<DialogDescription>Membuat menu baru dengan input data</DialogDescription>
-							</DialogHeader>
-							<div className="grid w-full gap-4">
-								<div className="grid w-full gap-3">
-									<Label htmlFor="nama">Nama Menu</Label>
-									<Input id="nama" name="name" placeholder="Masukkan Nama Menu" required />
+				<div className="space-y-4">
+					<h1 className="text-3xl font-bold mb-4">Hallo {user?.email}</h1>
+					{/* modal add */}
+					<Dialog open={createDialog} onOpenChange={setCreateDialog}>
+						<DialogTrigger asChild>
+							<Button className="font-bold cursor-pointer">Tambah Menu</Button>
+						</DialogTrigger>
+						<DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto no-scrollbar">
+							<form onSubmit={handleAddMenu} className="space-y-4">
+								<DialogHeader>
+									<DialogTitle>Tambah Menu</DialogTitle>
+									<DialogDescription>Membuat menu baru dengan input data</DialogDescription>
+								</DialogHeader>
+								<div className="grid w-full gap-4">
+									<div className="grid w-full gap-3">
+										<Label htmlFor="nama">Nama Menu</Label>
+										<Input id="nama" name="name" placeholder="Masukkan Nama Menu" required />
+									</div>
+									<div className="grid w-full gap-3">
+										<Label htmlFor="harga">Harga Menu</Label>
+										<Input id="harga" name="price" placeholder="Masukkan Harga Menu" required />
+									</div>
+									<div className="grid w-full gap-3">
+										<Label htmlFor="gambar">Gambar Menu</Label>
+										<Input
+											id="gambar"
+											name="image"
+											placeholder="Masukkan URL Gambar Menu"
+											required
+										/>
+									</div>
+									<div className="grid w-full gap-3">
+										<Label htmlFor="kategori">Kategori Menu</Label>
+										<Select required name="category">
+											<SelectTrigger className="w-full">
+												<SelectValue placeholder="Pilih Kategori" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectGroup>
+													<SelectLabel>Kategori Menu</SelectLabel>
+													<SelectItem value="makanan">Makanan</SelectItem>
+													<SelectItem value="minuman">Minuman</SelectItem>
+												</SelectGroup>
+											</SelectContent>
+										</Select>
+									</div>
+									<div className="grid w-full gap-3">
+										<Label htmlFor="deskripsi">Deskripsi Menu</Label>
+										<Textarea
+											id="deskripsi"
+											name="description"
+											required
+											placeholder="Masukkan Deskripsi Menu"
+											className="resize-none h-28"
+										/>
+									</div>
 								</div>
-								<div className="grid w-full gap-3">
-									<Label htmlFor="harga">Harga Menu</Label>
-									<Input id="harga" name="price" placeholder="Masukkan Harga Menu" required />
-								</div>
-								<div className="grid w-full gap-3">
-									<Label htmlFor="gambar">Gambar Menu</Label>
-									<Input id="gambar" name="image" placeholder="Masukkan URL Gambar Menu" required />
-								</div>
-								<div className="grid w-full gap-3">
-									<Label htmlFor="kategori">Kategori Menu</Label>
-									<Select required name="category">
-										<SelectTrigger className="w-full">
-											<SelectValue placeholder="Pilih Kategori" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectGroup>
-												<SelectLabel>Kategori Menu</SelectLabel>
-												<SelectItem value="makanan">Makanan</SelectItem>
-												<SelectItem value="minuman">Minuman</SelectItem>
-											</SelectGroup>
-										</SelectContent>
-									</Select>
-								</div>
-								<div className="grid w-full gap-3">
-									<Label htmlFor="deskripsi">Deskripsi Menu</Label>
-									<Textarea
-										id="deskripsi"
-										name="description"
-										required
-										placeholder="Masukkan Deskripsi Menu"
-										className="resize-none h-28"
-									/>
-								</div>
-							</div>
-							<DialogFooter>
-								<DialogClose asChild>
-									<Button type="button" variant={"secondary"} className="cursor-pointer">
-										Batal
+								<DialogFooter>
+									<DialogClose asChild>
+										<Button type="button" variant={"secondary"} className="cursor-pointer">
+											Batal
+										</Button>
+									</DialogClose>
+									<Button type="submit" className="cursor-pointer">
+										Tambah
 									</Button>
-								</DialogClose>
-								<Button type="submit" className="cursor-pointer">
-									Tambah
-								</Button>
-							</DialogFooter>
-						</form>
-					</DialogContent>
-				</Dialog>
+								</DialogFooter>
+							</form>
+						</DialogContent>
+					</Dialog>
+				</div>
+				<Button className="font-bold cursor-pointer" variant={"destructive"} onClick={handleLogout}>Logout</Button>
 			</div>
 			{/* data table */}
 			<div>
