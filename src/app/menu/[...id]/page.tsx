@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import Supabase from "@/lib/db";
+import SupabaseBrowserClient from "@/lib/supabase/client";
 import { IMenu } from "@/types/menu";
 import Image from "next/image";
 import { useParams } from "next/navigation";
@@ -12,7 +12,10 @@ const DetailMenu = () => {
 	const [detailMenu, setDetailMenu] = useState<IMenu | null>(null);
 	useEffect(() => {
 		const fetchDetailMenu = async () => {
-			const { data, error } = await Supabase.from("menus").select("*").eq("id", id).single();
+			const { data, error } = await SupabaseBrowserClient.from("menus")
+				.select("*")
+				.eq("id", id)
+				.single();
 			if (error) {
 				console.log("error: ", error);
 			} else {

@@ -9,7 +9,6 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import Supabase from "@/lib/db";
 import { IMenu } from "@/types/menu";
 import {
 	DropdownMenu,
@@ -46,6 +45,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
+import SupabaseBrowserClient from "@/lib/supabase/client";
 
 const AdminPage = () => {
 	const [menus, setMenus] = useState<IMenu[]>([]);
@@ -57,7 +57,7 @@ const AdminPage = () => {
 
 	useEffect(() => {
 		const fetchMenus = async () => {
-			const { data, error } = await Supabase.from("menus").select("*");
+			const { data, error } = await SupabaseBrowserClient.from("menus").select("*");
 			if (error) {
 				console.log("error: ", error);
 			} else {
@@ -71,7 +71,7 @@ const AdminPage = () => {
 		e.preventDefault();
 		const formData = new FormData(e.currentTarget);
 		try {
-			const { data, error } = await Supabase.from("menus")
+			const { data, error } = await SupabaseBrowserClient.from("menus")
 				.insert(Object.fromEntries(formData))
 				.select("*");
 			if (error) {
@@ -91,7 +91,9 @@ const AdminPage = () => {
 
 	const handleDeleteMenu = async () => {
 		try {
-			const { error } = await Supabase.from("menus").delete().eq("id", selectedMenu?.menu.id);
+			const { error } = await SupabaseBrowserClient.from("menus")
+				.delete()
+				.eq("id", selectedMenu?.menu.id);
 			if (error) {
 				console.log("error: ", error);
 				toast.error("Gagal menghapus menu: " + error.message);
@@ -111,7 +113,7 @@ const AdminPage = () => {
 		e.preventDefault();
 		const formData = new FormData(e.currentTarget);
 		try {
-			const { error } = await Supabase.from("menus")
+			const { error } = await SupabaseBrowserClient.from("menus")
 				.update(Object.fromEntries(formData))
 				.eq("id", selectedMenu?.menu.id);
 			if (error) {

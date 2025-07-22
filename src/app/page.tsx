@@ -1,31 +1,20 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import Supabase from "@/lib/db";
+import SupabaseServerClient from "@/lib/supabase/server";
 import { IMenu } from "@/types/menu";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
-const Home = () => {
-	const [menus, setMenus] = useState<IMenu[]>([]);
-	useEffect(() => {
-		const fetchMenus = async () => {
-			const { data, error } = await Supabase.from("menus").select("*");
-			if (error) {
-				console.log("ada error: ", error);
-			} else {
-				setMenus(data);
-			}
-		};
-		fetchMenus();
-	}, []);
+const Home = async () => {
+	const { data: menus, error } = await SupabaseServerClient.from("menus").select("*");
+	if (error) {
+		console.log("error: ", error);
+	}
 	return (
 		<main className="container mx-auto py-8">
 			<h1 className="text-3xl font-bold mb-4">Menu</h1>
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-				{menus.map((menu: IMenu) => (
+				{menus?.map((menu: IMenu) => (
 					<Card key={menu.id}>
 						<CardContent>
 							<Image
