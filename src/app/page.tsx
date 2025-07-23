@@ -12,7 +12,14 @@ const Home = async () => {
 	}
 	return (
 		<main className="container mx-auto py-8">
-			<h1 className="text-3xl font-bold mb-4">Menu</h1>
+			<div className="flex justify-between mb-7">
+				<h1 className="text-3xl font-bold">Menu</h1>
+				<Link href={"/login"}>
+					<Button className="font-bold cursor-pointer" size={"lg"} variant={"default"}>
+						Login
+					</Button>
+				</Link>
+			</div>
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 				{menus?.map((menu: IMenu) => (
 					<Card key={menu.id}>
