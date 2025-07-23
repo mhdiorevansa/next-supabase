@@ -54,6 +54,7 @@ const AdminPage = () => {
 	const [menus, setMenus] = useState<IMenu[]>([]);
 	const [user, setUser] = useState<User | null>(null);
 	const [createDialog, setCreateDialog] = useState(false);
+	const [logoutDialog, setLogoutDialog] = useState(false);
 	const [selectedMenu, setSelectedMenu] = useState<{
 		menu: IMenu;
 		action: "ubah" | "hapus";
@@ -84,7 +85,7 @@ const AdminPage = () => {
 			}
 		};
 		fetchUserAuth();
-	});
+	}, []);
 
 	const handleAddMenu = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -155,15 +156,16 @@ const AdminPage = () => {
 	};
 
 	const handleLogout = async () => {
-		const {error} = await SupabaseBrowserClient.auth.signOut();
+		const { error } = await SupabaseBrowserClient.auth.signOut();
 		if (error) {
 			console.log("error: ", error);
 			toast.error("Sepertinya ada kesalahan");
 		} else {
 			toast.success("Berhasil logout");
-			router.push('/');
+			router.push("/");
+			setLogoutDialog(false);
 		}
-	}
+	};
 
 	return (
 		<main className="container mx-auto py-8">
@@ -239,7 +241,30 @@ const AdminPage = () => {
 						</DialogContent>
 					</Dialog>
 				</div>
-				<Button className="font-bold cursor-pointer" variant={"destructive"} onClick={handleLogout}>Logout</Button>
+				{/* modal logout */}
+				<Dialog open={logoutDialog} onOpenChange={setLogoutDialog}>
+					<DialogTrigger asChild>
+						<Button className="font-bold cursor-pointer" variant={"destructive"}>
+							Logout
+						</Button>
+					</DialogTrigger>
+					<DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto no-scrollbar">
+						<DialogHeader>
+							<DialogTitle>Logout</DialogTitle>
+							<DialogDescription>Kamu yakin ingin logout?</DialogDescription>
+						</DialogHeader>
+						<DialogFooter>
+							<DialogClose asChild>
+								<Button variant={"secondary"} className="cursor-pointer">
+									Batal
+								</Button>
+							</DialogClose>
+							<Button onClick={handleLogout} variant={"destructive"} className="cursor-pointer">
+								Logout
+							</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
 			</div>
 			{/* data table */}
 			<div>
