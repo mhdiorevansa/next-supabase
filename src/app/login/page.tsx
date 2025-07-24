@@ -8,7 +8,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import SupabaseBrowserClient from "@/lib/supabase/client";
+import createBrowserSupabaseClient from "@/lib/supabase/browser-client";
 
 const LoginPage = () => {
 	const router = useRouter();
@@ -19,7 +19,7 @@ const LoginPage = () => {
 	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setLoading(true);
-		const { error } = await SupabaseBrowserClient.auth.signInWithPassword({
+		const { error } = await createBrowserSupabaseClient.auth.signInWithPassword({
 			email,
 			password,
 		});

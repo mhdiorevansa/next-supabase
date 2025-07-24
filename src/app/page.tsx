@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import SupabaseServerClient from "@/lib/supabase/server";
+import createPublicSupabaseClient from "@/lib/supabase/public-client";
 import { IMenu } from "@/types/menu";
 import Image from "next/image";
 import Link from "next/link";
 
 const Home = async () => {
-	const { data: menus, error } = await SupabaseServerClient.from("menus").select("*");
+	const { data: menus, error } = await createPublicSupabaseClient.from("menus").select("*");
 	if (error) {
 		console.log("error: ", error);
 	}
