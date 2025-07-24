@@ -59,12 +59,14 @@ const AdminPage = () => {
 		menu: IMenu;
 		action: "ubah" | "hapus";
 	} | null>(null);
+	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
 		const fetchMenus = async () => {
 			const { data, error } = await createBrowserSupabaseClient.from("menus").select("*");
 			if (error) {
 				console.log("error: ", error);
+				toast.error("Sepertinya ada kesalahan");
 			} else {
 				setMenus(data);
 			}
@@ -80,6 +82,7 @@ const AdminPage = () => {
 			} = await createBrowserSupabaseClient.auth.getUser();
 			if (error) {
 				console.log("error: ", error);
+				toast.error("Sepertinya ada kesalahan");
 			} else {
 				setUser(user);
 			}
@@ -89,11 +92,14 @@ const AdminPage = () => {
 
 	const handleAddMenu = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+		setLoading(true);
 		const formData = new FormData(e.currentTarget);
 		try {
-			const { data, error } = await createBrowserSupabaseClient.from("menus")
+			const { data, error } = await createBrowserSupabaseClient
+				.from("menus")
 				.insert(Object.fromEntries(formData))
 				.select("*");
+			setLoading(false);
 			if (error) {
 				console.log("error: ", error);
 				toast.error("Gagal menambah menu: " + error.message);
@@ -111,9 +117,12 @@ const AdminPage = () => {
 
 	const handleDeleteMenu = async () => {
 		try {
-			const { error } = await createBrowserSupabaseClient.from("menus")
+			setLoading(true);
+			const { error } = await createBrowserSupabaseClient
+				.from("menus")
 				.delete()
 				.eq("id", selectedMenu?.menu.id);
+			setLoading(false);
 			if (error) {
 				console.log("error: ", error);
 				toast.error("Gagal menghapus menu: " + error.message);
@@ -131,11 +140,14 @@ const AdminPage = () => {
 
 	const handleUpdateMenu = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+		setLoading(true);
 		const formData = new FormData(e.currentTarget);
 		try {
-			const { error } = await createBrowserSupabaseClient.from("menus")
+			const { error } = await createBrowserSupabaseClient
+				.from("menus")
 				.update(Object.fromEntries(formData))
 				.eq("id", selectedMenu?.menu.id);
+			setLoading(false);
 			if (error) {
 				console.log("error: ", error);
 				toast.error("Gagal mengubah menu: " + error.message);
@@ -156,15 +168,17 @@ const AdminPage = () => {
 	};
 
 	const handleLogout = async () => {
+		setLoading(true);
 		const { error } = await createBrowserSupabaseClient.auth.signOut();
+		setLoading(false);
 		if (error) {
 			console.log("error: ", error);
 			toast.error("Sepertinya ada kesalahan");
 		} else {
 			toast.success("Berhasil logout");
 			router.push("/");
-			setLogoutDialog(false);
 		}
+		setLogoutDialog(false);
 	};
 
 	return (
@@ -233,8 +247,11 @@ const AdminPage = () => {
 											Batal
 										</Button>
 									</DialogClose>
-									<Button type="submit" className="cursor-pointer">
-										Tambah
+									<Button
+										type="submit"
+										className={`${loading ? "cursor-no-drop" : "cursor-pointer"}`}
+										disabled={loading}>
+										{loading ? "Loading..." : "Tambah"}
 									</Button>
 								</DialogFooter>
 							</form>
@@ -259,8 +276,12 @@ const AdminPage = () => {
 									Batal
 								</Button>
 							</DialogClose>
-							<Button onClick={handleLogout} variant={"destructive"} className="cursor-pointer">
-								Logout
+							<Button
+								onClick={handleLogout}
+								variant={"destructive"}
+								className={`${loading ? "cursor-no-drop" : "cursor-pointer"}`}
+								disabled={loading}>
+								{loading ? "Loading..." : "Logout"}
 							</Button>
 						</DialogFooter>
 					</DialogContent>
@@ -341,8 +362,12 @@ const AdminPage = () => {
 								Batal
 							</Button>
 						</DialogClose>
-						<Button onClick={handleDeleteMenu} variant={"destructive"} className="cursor-pointer">
-							Hapus
+						<Button
+							onClick={handleDeleteMenu}
+							variant={"destructive"}
+							className={`${loading ? "cursor-no-drop" : "cursor-pointer"}`}
+							disabled={loading}>
+							{loading ? "Loading..." : "Hapus"}
 						</Button>
 					</DialogFooter>
 				</DialogContent>
@@ -427,8 +452,9 @@ const AdminPage = () => {
 									Batal
 								</Button>
 							</DialogClose>
-							<Button type="submit" className="cursor-pointer">
-								Ubah
+							<Button type="submit" className={`${loading ? "cursor-no-drop" : "cursor-pointer"}`}
+										disabled={loading}>
+								{loading ? "Loading..." : "Ubah"}
 							</Button>
 						</DialogFooter>
 					</form>
