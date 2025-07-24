@@ -14,19 +14,23 @@ const LoginPage = () => {
 	const router = useRouter();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [loading, setLoading] = useState(false);
 
 	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+		setLoading(true);
 		const { error } = await SupabaseBrowserClient.auth.signInWithPassword({
 			email,
 			password,
 		});
+		setLoading(false);
 		if (error) {
 			console.log(error);
 			toast.error("Sepertinya ada kesalahan");
+		} else {
+			toast.success("Berhasil login");
+			router.push("/admin");
 		}
-		toast.success("Berhasil login");
-		router.push("/admin");
 	};
 
 	return (
@@ -59,8 +63,11 @@ const LoginPage = () => {
 								required
 							/>
 						</div>
-						<Button type="submit" className="w-full">
-							Login
+						<Button
+							type="submit"
+							className={`w-full ${loading ? "cursor-no-drop" : "cursor-pointer"}`}
+							disabled={loading}>
+							{loading ? "Loading..." : "Login"}
 						</Button>
 					</form>
 					<p className="mt-4 text-center text-sm text-muted-foreground">
