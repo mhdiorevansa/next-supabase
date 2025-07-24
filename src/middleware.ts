@@ -1,7 +1,7 @@
 import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
 import { NextResponse, type NextRequest } from "next/server";
 
-const authRoutes = ["/login"];
+const authRoutes = ["/login", "/register"];
 const protectedRoutes = ["/admin"];
 
 const middleware = async (req: NextRequest) => {
@@ -32,7 +32,7 @@ const middleware = async (req: NextRequest) => {
 };
 
 export const config = {
-	matcher: ["/admin/:path*", "/login/:path*"],
+	matcher: ["/admin/:path*", "/login/:path*", "/register/:path*"],
 };
 
 export default middleware;
