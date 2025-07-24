@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import createPublicSupabaseClient from "@/lib/supabase/public-client";
+import createPublicSupabaseClient from "@/lib/supabase/client/public-client";
 import { IMenu } from "@/types/menu";
 import Image from "next/image";
 import Link from "next/link";

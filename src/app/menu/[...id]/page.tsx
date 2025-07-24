@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import createBrowserSupabaseClient from "@/lib/supabase/browser-client";
+import createBrowserSupabaseClient from "@/lib/supabase/client/browser-client";
 import { IMenu } from "@/types/menu";
 import Image from "next/image";
 import { useParams } from "next/navigation";

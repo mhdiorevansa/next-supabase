@@ -8,7 +8,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import createBrowserSupabaseClient from "@/lib/supabase/browser-client";
+import createBrowserSupabaseClient from "@/lib/supabase/client/browser-client";
 
 const LoginPage = () => {
 	const router = useRouter();

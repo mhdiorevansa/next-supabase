@@ -45,7 +45,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
-import createBrowserSupabaseClient from "@/lib/supabase/browser-client";
+import createBrowserSupabaseClient from "@/lib/supabase/client/browser-client";
 import { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 
